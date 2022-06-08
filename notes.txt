@@ -1,0 +1,142 @@
+Apache Airflow Tutorials
+===========================
+Airflow is a Monitoring paltform for programmatically authoring, scheduling, and monitoring workflows
+
+Authoring - Setting up/ Writing python scripts as DAGs. DAG - Directed Acyclic Graphs
+
+Scheduling - User's can mention, start, end, intervals in between etc
+
+Monitoring - provides an interface to monitor the work flows in real time.
+
+
+Why Airflow over other methods like Cronjobs etc...?
+
+Ans: Airflow gives more control over the jobs to run like, when to run, if it needs to be dependant on other tasks, what to do on task failures etc.
+These things become very much easier to manage when using Airflow.
+
+
+Link ref:
+===========
+
+https://www.youtube.com/watch?v=Axm35hOUzyQ - SIMPLE DEFINITION 
+https://www.youtube.com/watch?v=Oemg-3aiAiI&list=PL79i7SgJCJ9hu5GqcA091h6zuewmsvSyy - PLAYLISTS RELATED TO AIRFLOW.
+
+
+https://github.com/marclamberti/docker-airflow  - GITHUB DOCKER-COMPOSE FILE AND OTHER FILES
+
+
+HOW TO DEPLOY AIRFLOW IN A DOCKER CONTAINER
+====================================================
+
+INSTALL DOCKER, docker-compose etc
+
+
+CLONE: https://github.com/marclamberti/docker-airflow
+
+
+CD TO THE FOLDER.
+
+RUN THE COMMAND;
+
+docker-compose build
+docker-compose up -d
+
+
+AND CHECK TO SEE IF 3 CONTAINERS ARE UP AND RUNNING.
+
+=====
+CONTAINER ID   IMAGE                  COMMAND                  CREATED        STATUS          PORTS                    NAMES
+ab037ae8111f   apache/airflow:2.0.0   "/usr/bin/dumb-init …"   16 hours ago   Up 32 minutes   8080/tcp                 airflow_scheduler
+add789926dc7   apache/airflow:2.0.0   "/usr/bin/dumb-init …"   16 hours ago   Up 20 minutes   0.0.0.0:8080->8080/tcp   airflow_webserver
+f5e6d6d2a7df   postgres:12            "docker-entrypoint.s…"   16 hours ago   Up 29 minutes   0.0.0.0:5432->5432/tcp   docker-airflow_postgres_1
+=====
+
+To load the Airflow page, use the link: http://<machine ip>:8080/admin/
+
+
+
+HOW TO WRITE A DAG FILE
+============================
+
+DAG IS TO BE WRITTEN IN PYTHON AND IT HAS 5 MAIN STEPS THAT NEED TO BE PRESENT;
+
+1. IMPORT MODULES3
+
+2.DEFINE ARGUMENTS
+
+3.INSTANTIATE A DAG
+
+4. WRITE ALL THE TASKS
+
+5. SETUP DEPENDANCY AMONG TASKS. WHICH TASK SHOULD RUN BEFORE/AFTER ANOTHER TASK.
+
+DAG IS A DATA PIPELINE WHICH DOESEN'T WORK IN CYCLIC FASION.
+
+
+
+SAMPLE CODE 1 : NORMAL SCHEDULER WITH 2 NON DEPENDENT TASKS
+==================
+
+import airflow                            #<---------- PYTHON MODULES ARE IMPORTED HERE.
+from airflow import DAG
+from airflow.operators.bash_operator import BashOperator
+
+from datetime import datetime
+
+with DAG("manu", start_date=datetime(2022, 6, 7), schedule_interval="@daily", catchup=False) as dag:
+
+    task1 = BashOperator(  #<----------TASKS DEFINED HERE.
+        task_id="task-1",
+        bash_command='ls',
+        dag=dag,
+    )
+
+
+    task2 = BashOperator(   #<----------TASKS DEFINED HERE.
+        task_id="task-2",
+        bash_command='ls',
+        dag=dag,
+    )
+
+
+
+
+
+SAMPLE CODE 2 : 2 TASKS RUN IN AN ORDER LIKE, TASK 1, TASK 2
+==================
+
+import airflow
+from airflow import DAG
+from airflow.operators.bash_operator import BashOperator
+
+from datetime import datetime
+
+with DAG("task-2", start_date=datetime(2022, 6, 7), schedule_interval="@hourly", catchup=False) as dag: #<-------DAG DEFINED HERE WITH NAME ETC.
+
+    task1 = BashOperator(      #<----------TASKS DEFINED HERE.
+        task_id="task-1",
+        bash_command='ls',
+        dag=dag,
+    )
+
+
+    task2 = BashOperator(     #<-----------TASKS DEFINED HERE
+        task_id="task-2",
+        bash_command='pwd',
+        dag=dag,
+    )
+
+
+task1 >> task2  #<----------Here the task1 will work first and then the task2 
+
+
+
+
+XCOMS
+========
+Ref Vid link: https://www.youtube.com/watch?v=8veO7-SN5ZY
+Helps with exchanging small amount of data between tasks using the key value pair.
+
+
+
+
